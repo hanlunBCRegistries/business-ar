@@ -24,7 +24,6 @@ const { data } = await useAsyncData(fullId, () => {
     .where({ _locale: locale.value, _path: { $eq: routeWithoutLocale.value + props.routeSuffix } })
     .findOne()
 }, {
-  watch: [locale, routeWithoutLocale]
 })
 
 </script>
