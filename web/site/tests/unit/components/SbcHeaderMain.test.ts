@@ -65,7 +65,7 @@ describe('<SbcHeaderMain/>', () => {
       }
     })
 
-    const linkTexts = ['Service BC Connect']
+    const linkTexts = ['BC Registries and Digital Services']
 
     linkTexts.forEach((link: string) => {
       expect(screen.getByText(link)).toBeTruthy()
