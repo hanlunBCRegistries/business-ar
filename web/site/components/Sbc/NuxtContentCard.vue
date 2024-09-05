@@ -32,13 +32,23 @@ const fetchData = async () => {
     .findOne()
 }
 
-const { data } = await useAsyncData(fullId, fetchData, {
-  watch: [locale, routeWithoutLocale]
+const { data, refresh } = await useAsyncData(fullId, fetchData)
+let debounceTimer: NodeJS.Timeout | null = null
+watch([locale, routeWithoutLocale], () => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+  }
+  debounceTimer = setTimeout(() => {
+    refresh()
+  }, 500)
 })
 
 </script>
 <template>
   <UCard class="w-full" :data-testid="fullId">
-    <ContentRenderer :value="data" class="prose prose-bcGov text-left" />
+    <ContentRenderer v-if="data" :value="data" class="prose prose-bcGov text-left" />
+    <div v-else class="text-center">
+      <UIcon name="i-mdi-loading" class="animate-spin" />
+    </div>
   </UCard>
 </template>
