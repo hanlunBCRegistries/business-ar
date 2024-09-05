@@ -29,11 +29,11 @@ const { data: contentDocs } = await useAsyncData('content-docs-query', () => {
 const helpDocs = computed(() =>
   contentDocs.value?.find(doc => doc._path === '/help')
 )
-const index1 = computed(() => 
+const index1 = computed(() =>
   contentDocs.value?.find(doc => doc._path === '/index/1')
 )
 
-const index2 = computed(() => 
+const index2 = computed(() =>
   contentDocs.value?.find(doc => doc._path === '/index/2')
 )
 provide('sbc-bar-help-docs', helpDocs)
