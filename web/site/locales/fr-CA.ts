@@ -4,6 +4,10 @@ export default {
       title: '',
       description: "Le prochain Rapport Annuel de cette entreprise n'est pas dû avant le {date}. Veuillez déposer le Rapport Annuel à partir de cette date."
     },
+    'payment-method': {
+      title: 'Méthode de paiement non disponible',
+      description: 'Le compte PAD est en période de confirmation. Veuillez utiliser le paiement par carte de crédit.'
+    },
     'invalid-next-ar-year': {
       title: 'Année de Rapport Annuel invalide',
       description: "L'année suivante du Rapport Annuel est invalide ou manquante."

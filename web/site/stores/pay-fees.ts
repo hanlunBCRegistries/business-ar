@@ -1,11 +1,98 @@
 import { v4 as UUIDv4 } from 'uuid'
 import payApi from '~/services/pay-api'
+
+export enum PaymentMethod {
+  DIRECT_PAY = 'DIRECT_PAY',
+  PAD = 'PAD'
+}
+
+export enum PaymentStatus {
+  PENDING = 'PENDING',
+  PENDING_PAD_ACTIVATION = 'PENDING_PAD_ACTIVATION',
+  ACTIVE = 'ACTIVE'
+}
+
 export const usePayFeesStore = defineStore('bar-sbc-pay-fees', () => {
   const fees: Ref<PayFeesWidgetItem[]> = ref([])
   const folioNumber = ref('')
   const feeInfo: Ref<[FeeData, FeeInfo][]> = ref([])
 
-  function addFee (newFee: FeeInfo) {
+  // Add PAD related state
+  const PAD_PENDING_STATES = ['PENDING', 'PENDING_PAD_ACTIVATION']
+  const userPaymentAccount = ref<any>({}) // Replace 'any' with your PaymentAccount interface
+  const userSelectedPaymentMethod = ref<PaymentMethod>(PaymentMethod.DIRECT_PAY)
+  const allowAlternatePaymentMethod = ref(false)
+  const allowedPaymentMethods = ref<{ label: string, value: PaymentMethod }[]>([])
+
+  // Watch for payment method changes
+  watch(userSelectedPaymentMethod, () => {
+    if (userPaymentAccount.value?.cfsAccount?.status &&
+      PAD_PENDING_STATES.includes(userPaymentAccount.value.cfsAccount.status as PaymentStatus)) {
+      userSelectedPaymentMethod.value = PaymentMethod.DIRECT_PAY
+      const alertStore = useAlertStore()
+      alertStore.addAlert({
+        severity: 'error',
+        category: AlertCategory.PAYMENT_METHOD
+      })
+    }
+  })
+
+  // Reset PAD options
+  function resetPaymentOptions() {
+    userPaymentAccount.value = {}
+    userSelectedPaymentMethod.value = PaymentMethod.DIRECT_PAY
+    allowAlternatePaymentMethod.value = false
+    allowedPaymentMethods.value = []
+  }
+  // Initialize PAD payment method
+  async function initPaymentMethod() {
+    resetPaymentOptions()
+    const accountStore = useAccountStore()
+
+    try {
+      // Get payment account
+      const response = await useBarApi<any>(
+        `/user/accounts/${accountStore.currentAccount.id}/payment`,
+        {},
+        'token',
+        'Error getting payment account details'
+      )
+
+      userPaymentAccount.value = response
+
+      // Set up payment method options
+      let defaultMethod = userPaymentAccount.value.paymentMethod
+      if (defaultMethod) {
+        const accountNum = userPaymentAccount.value.cfsAccount?.bankAccountNumber ?? ''
+        allowedPaymentMethods.value.push({
+          label: `PAD Account ${accountNum}`,
+          value: defaultMethod
+        })
+
+        if (defaultMethod !== PaymentMethod.DIRECT_PAY) {
+          allowedPaymentMethods.value.push({
+            label: 'Credit Card',
+            value: PaymentMethod.DIRECT_PAY
+          })
+
+          if (PAD_PENDING_STATES.includes(response.cfsAccount?.status)) {
+            defaultMethod = PaymentMethod.DIRECT_PAY
+          }
+        }
+      }
+
+      userSelectedPaymentMethod.value = defaultMethod
+      allowAlternatePaymentMethod.value = true
+    } catch (e) {
+      console.error('Error initializing payment method:', e)
+      const alertStore = useAlertStore()
+      alertStore.addAlert({
+        severity: 'error',
+        category: AlertCategory.PAYMENT_METHOD
+      })
+    }
+  }
+  function addFee(newFee: FeeInfo) {
     const fee = fees.value.find((fee: PayFeesWidgetItem) => // check if fee already exists
       fee.filingType === newFee.filingType && fee.filingTypeCode === newFee.filingTypeCode
     )
@@ -25,7 +112,7 @@ export const usePayFeesStore = defineStore('bar-sbc-pay-fees', () => {
     }
   }
 
-  function removeFee (feeToRemove: FeeInfo) {
+  function removeFee(feeToRemove: FeeInfo) {
     const fee = fees.value.find((fee: PayFeesWidgetItem) => // check if fee exists
       fee.filingType === feeToRemove.filingType && fee.filingTypeCode === feeToRemove.filingTypeCode
     )
@@ -42,7 +129,7 @@ export const usePayFeesStore = defineStore('bar-sbc-pay-fees', () => {
     }
   }
 
-  async function loadFeeTypesAndCharges (newFolioNumber: string, filingData: FeeData[]) {
+  async function loadFeeTypesAndCharges(newFolioNumber: string, filingData: FeeData[]) {
     folioNumber.value = newFolioNumber
 
     // fetch fee info for each fee and add to feeInfo array
@@ -54,7 +141,7 @@ export const usePayFeesStore = defineStore('bar-sbc-pay-fees', () => {
     }
   }
 
-  async function getFeeInfo (searchFilingData: FeeData, tryLoadIfNotCached: boolean = true): Promise<FeeInfo | undefined> {
+  async function getFeeInfo(searchFilingData: FeeData, tryLoadIfNotCached: boolean = true): Promise<FeeInfo | undefined> {
     const feeInfoItem = feeInfo.value.find( // check if fee info already exists
       ([filingData, _]) =>
         filingData.entityType === searchFilingData.entityType &&
@@ -71,7 +158,7 @@ export const usePayFeesStore = defineStore('bar-sbc-pay-fees', () => {
   }
 
   // load fee info and add to fees array
-  async function addPayFees (feeCode: string): Promise<void> {
+  async function addPayFees(feeCode: string): Promise<void> {
     try {
       const fee = payApi.feeType[feeCode]
       const feeInfo = await getFeeInfo(fee)
@@ -88,7 +175,7 @@ export const usePayFeesStore = defineStore('bar-sbc-pay-fees', () => {
     }
   }
 
-  function $reset () {
+  function $reset() {
     fees.value = []
     folioNumber.value = ''
     feeInfo.value = []
@@ -103,6 +190,13 @@ export const usePayFeesStore = defineStore('bar-sbc-pay-fees', () => {
     removeFee,
     getFeeInfo,
     addPayFees,
+    
+    // New PAD related returns
+    userPaymentAccount,
+    userSelectedPaymentMethod,
+    allowedPaymentMethods,
+    allowAlternatePaymentMethod,
+    initPaymentMethod,
     $reset
   }
 }
