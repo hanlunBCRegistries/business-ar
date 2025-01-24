@@ -1,4 +1,8 @@
 <script setup lang="ts" generic="T">
+
+import SbcPaymentMethodSelector from './PaymentMethodSelector.vue'
+import { type PayFeesWidgetItem } from '~/interfaces/fees'
+
 const props = defineProps({
   fees: { type: Array<PayFeesWidgetItem>, required: true },
   isLoading: { type: Boolean, default: false }
@@ -96,6 +100,7 @@ const total = computed(() => {
         </div>
       </template>
     </UCard>
+    <SbcPaymentMethodSelector />
     <UButton
       :label="$t('btn.submitAndPay')"
       :loading="isLoading"

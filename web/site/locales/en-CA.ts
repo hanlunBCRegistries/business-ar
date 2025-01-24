@@ -5,8 +5,8 @@ export default {
       description: 'The next Annual Report for this company is not due until {date}. Please file the Annual Report on or after that date.'
     },
     'payment-method': {
-    title: 'Payment Method Unavailable',
-    description: 'The PAD account is in the confirmation period. Please use credit card payment.'
+      title: 'Payment Method Unavailable',
+      description: 'The PAD account is in the confirmation period. Please use credit card payment.'
     },
     'invalid-next-ar-year': {
       title: 'Invalid Annual Report Year',
@@ -317,6 +317,7 @@ export default {
       priorityFees: 'Priority Fees',
       futureEffectiveFees: 'Future Effective Fees',
       serviceFees: 'Service Fee',
+      paymentMethod: 'Payment Method',
       itemLabels: {
         TEST: 'This is test entry',
         REGSIGIN: 'Significant Individual Change',

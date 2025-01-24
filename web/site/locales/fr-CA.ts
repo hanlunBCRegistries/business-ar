@@ -315,6 +315,7 @@ export default {
       priorityFees: 'Frais prioritaires',
       futureEffectiveFees: 'Frais effectifs futurs',
       serviceFees: 'Frais de Service',
+      paymentMethod: 'Mode de paiement',
       itemLabels: {
         TEST: 'This is test entry',
         REGSIGIN: 'Significant Individual Change',
