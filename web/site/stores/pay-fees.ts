@@ -13,6 +13,7 @@ export const usePayFeesStore = defineStore('bar-sbc-pay-fees', () => {
   const userSelectedPaymentMethod = ref<ConnectPaymentMethod>(ConnectPaymentMethod.DIRECT_PAY)
   const allowAlternatePaymentMethod = ref<boolean>(false)
   const allowedPaymentMethods = ref<{ label: string, value: ConnectPaymentMethod }[]>([])
+  const { t } = useI18n()
 
   function addFee (newFee: FeeInfo) {
     const fee = fees.value.find((fee: PayFeesWidgetItem) => // check if fee already exists
@@ -95,6 +96,18 @@ export const usePayFeesStore = defineStore('bar-sbc-pay-fees', () => {
       })
     }
   }
+
+  watch(userSelectedPaymentMethod, () => {
+    // if pad in confirmation period then set selected payment to DIRECT_PAY
+    if (PAD_PENDING_STATES.includes(userPaymentAccount.value?.cfsAccount?.status)) {
+      userSelectedPaymentMethod.value = ConnectPaymentMethod.DIRECT_PAY
+      // show alert for user using window.alert instead of a modal
+      window.alert(
+        t('modal.padConfirmationPeriod.title') + '\n' +
+        t('modal.padConfirmationPeriod.content')
+      )
+    }
+  })
 
   const $resetAlternatePayOptions = () => {
     userPaymentAccount.value = {} as ConnectPayAccount
