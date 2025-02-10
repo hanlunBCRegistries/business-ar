@@ -346,14 +346,14 @@ export default {
     methodLabels: {
       DIRECT_PAY: 'Carte de crédit',
       PAD: 'Débit préautorisé (PAD) {account}',
-      BCOL: 'Services bancaires en ligne',
-      JV: 'Bon de journal'
+      DRAWDOWN: 'Services bancaires en ligne',
+      EJV: 'Bon de journal'
     }
   },
   paymentMethod: {
     DIRECT_PAY: 'Carte de crédit',
     PAD: 'Débit préautorisé (PAD) {account}',
-    BCOL: 'Services bancaires en ligne',
-    JV: 'Bon de journal'
+    DRAWDOWN: 'Services bancaires en ligne',
+    EJV: 'Bon de journal'
   }
 }
