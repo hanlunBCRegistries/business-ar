@@ -348,14 +348,14 @@ export default {
     methodLabels: {
       DIRECT_PAY: 'Credit Card',
       PAD: 'Pre-authorized Debit (PAD) {account}',
-      BCOL: 'Online Banking',
-      JV: 'Journal Voucher'
+      DRAWDOWN: 'Online Banking',
+      EJV: 'Journal Voucher'
     }
   },
   paymentMethod: {
     DIRECT_PAY: 'Credit Card',
     PAD: 'Pre-authorized Debit (PAD) {account}',
-    BCOL: 'Online Banking',
-    JV: 'Journal Voucher'
+    DRAWDOWN: 'Online Banking',
+    EJV: 'Journal Voucher'
   }
 }
