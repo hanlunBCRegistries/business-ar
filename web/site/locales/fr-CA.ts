@@ -355,5 +355,8 @@ export default {
     PAD: 'Débit préautorisé (PAD) {account}',
     DRAWDOWN: 'Services bancaires en ligne',
     EJV: 'Bon de journal'
-  }
+  },
+  padConfirmationPeriod: {
+    content: 'Compte PAD : {bankNumber} est en période de confirmation. Veuillez utiliser la carte de crédit.'
+  },
 }
