@@ -357,5 +357,8 @@ export default {
     PAD: 'Pre-authorized Debit (PAD) {account}',
     DRAWDOWN: 'Online Banking',
     EJV: 'Journal Voucher'
+  },
+  padConfirmationPeriod: {
+    content: 'PAD Account: {bankNumber} is in confirmation period. Please use Credit Card.'
   }
 }
