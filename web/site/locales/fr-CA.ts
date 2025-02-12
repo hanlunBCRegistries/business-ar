@@ -63,7 +63,10 @@ export default {
     'fee-info': {
       title: 'Erreur de Frais',
       description: 'Erreur lors de la récupération des frais, veuillez réessayer ou revenir plus tard.'
-    }
+    },
+    'pad-confirmation': {
+      title: 'Débit Préautorisé (PAD) en Période de Confirmation',
+      description: 'Votre compte PAD: {accountNumber} est en période de confirmation. Veuillez utiliser une carte de crédit.'
   },
   btn: {
     getStarted: 'Commencer',
