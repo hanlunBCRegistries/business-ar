@@ -67,6 +67,7 @@ export default {
     'pad-confirmation': {
       title: 'Débit Préautorisé (PAD) en Période de Confirmation',
       description: 'Votre compte PAD: {accountNumber} est en période de confirmation. Veuillez utiliser une carte de crédit.'
+    }
   },
   btn: {
     getStarted: 'Commencer',
