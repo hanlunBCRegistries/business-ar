@@ -103,8 +103,7 @@ export const usePayFeesStore = defineStore('bar-sbc-pay-fees', () => {
       userSelectedPaymentMethod.value = ConnectPaymentMethod.DIRECT_PAY
       // show alert for user using window.alert instead of a modal
       window.alert(
-        t('modal.padConfirmationPeriod.title') + '\n' +
-        t('modal.padConfirmationPeriod.content')
+        t('PAD Account: ' + userPaymentAccount.value?.cfsAccount?.bankAccountNumber + ' is in confirmation period. Please use Credit Card.') 
       )
     }
   })
