@@ -37,6 +37,8 @@ const paymentMethodLabel = computed(() => {
   })
 })
 
+const baseText = 'Paying with'
+
 const displayCanadianDollars = (amount: number) => {
   if (!amount) {
     return '$0.00'
@@ -111,23 +113,6 @@ onMounted(async () => {
 
       <template #footer>
         <div class="space-y-4">
-          <div v-if="allowAlternatePaymentMethod" class="pt-4">
-            <label class="mb-2 block text-sm font-medium">{{ $t('payment.method') }}</label>
-            <USelectMenu
-              v-model="userSelectedPaymentMethod"
-              :options="allowedPaymentMethods"
-              value-attribute="value"
-              class="w-full"
-              :ui-menu="{ option: { base: 'cursor-pointer', size: 'text-xs' } }"
-            >
-              <template #label>
-                <span class="text-xs">
-                  {{ paymentMethodLabel }}
-                </span>
-              </template>
-            </USelectMenu>
-          </div>
-
           <div class="flex items-center justify-between" data-cy="pay-fees-widget-total">
             <span class="mr-auto text-sm text-bcGovColor-darkGray">
               {{ $t('widgets.feeSummary.total') }}
@@ -149,6 +134,50 @@ onMounted(async () => {
                 -
               </span>
             </div>
+          </div>
+
+          <div v-if="allowAlternatePaymentMethod" class="w-full pt-2">
+            <UDivider class="my-2" :ui="{ border: { base: 'flex border-bcGovGray-200' }}" />
+            <USelectMenu
+              v-slot="{ open }"
+              v-model="userSelectedPaymentMethod"
+              :options="allowedPaymentMethods"
+              value-attribute="value"
+              class="w-full"
+              :ui-menu="{
+                option: {
+                  base: 'cursor-pointer font-normal',
+                  size: 'text-xs'
+                },
+                base: '-mt-1',
+                rounded: 'rounded-b',
+                width: 'w-full'
+              }"
+              :ui="{
+                size: { lg: 'h-min' },
+                color: {
+                  gray: {
+                    outline: 'bg-white ring-0 hover:bg-gray-200 hover:border-gray-600 focus:border-none focus:ring-0',
+                  }
+                },
+                border: 'border-0',
+                ring: 'ring-0'
+              }"
+            >
+              <button
+                class="flex w-full items-center justify-between gap-4 py-2 px-0 text-left hover:bg-gray-100"
+              >
+                <span class="mr-auto text-sm font-normal text-bcGovColor-darkGray">
+                  {{ baseText }} {{ paymentMethodLabel }}
+                </span>
+                <UIcon
+                  name="i-mdi-caret-down"
+                  class="text-blue-500 transition-transform !size-5"
+                  :class="[open && 'rotate-180']"
+                  style="min-width: 1rem; min-height: 1rem;"
+                />
+              </button>
+            </USelectMenu>
           </div>
         </div>
       </template>
