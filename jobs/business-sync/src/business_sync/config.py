@@ -83,7 +83,6 @@ class _Config:  # pylint: disable=too-few-public-methods
     # Get the base64-encoded credentials from the environment variable
     WAREHOUSE_CREDENTIALS_FILE_CONTENTS = os.getenv("WAREHOUSE_CREDENTIALS_FILE", None)
 
-
     if WAREHOUSE_CREDENTIALS_FILE_CONTENTS:
         # Optionally strip leading/trailing quotes if necessary
         if (WAREHOUSE_CREDENTIALS_FILE_CONTENTS.startswith("'") and WAREHOUSE_CREDENTIALS_FILE_CONTENTS.endswith("'")) or \
