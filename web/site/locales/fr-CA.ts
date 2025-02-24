@@ -256,7 +256,7 @@ export default {
       form: { // TODO: review annual report form translations
         agmStatus: {
           question: "Le statut de l'Assemblée Générale Annuelle (AGA) {year} de cette entreprise",
-          tooltip: "Les informations sur les AGA sont utilisées pour calculer les dates des prolongations et les changements de lieu des AGA. Cela aide aussi à s'assurer que votre entreprise reste conforme et en règle.",
+          tooltip: "Les informations sur les AGA sont utilisées pour calculer les dates des prolongations et les changements de lieu des AGA. Cela aide à s'assurer que votre entreprise reste conforme.",
           opt1: 'Notre AGA {year} a eu lieu',
           opt2: 'Notre AGA {year} aura lieu',
           opt3: 'Notre AGA {year} est dispensée, considérée comme tenue',

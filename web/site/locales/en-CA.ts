@@ -258,7 +258,7 @@ export default {
       form: {
         agmStatus: {
           question: 'The {year} Annual General Meeting (AGM) status of this business',
-          tooltip: 'AGM information is used to calculate dates for AGM extensions and location changes. It also helps ensure your business stays compliant and in good standing.',
+          tooltip: 'AGM information is used to calculate dates for AGM extensions and location changes. It also helps to ensure your business stays compliant.',
           opt1: 'Our {year} AGM was held',
           opt2: 'Our {year} AGM is to be held',
           opt3: 'Our {year} AGM is waived, deemed to have been held',
