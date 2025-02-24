@@ -102,7 +102,7 @@ class _Config:  # pylint: disable=too-few-public-methods
 
         except (base64.binascii.Error, UnicodeDecodeError, json.JSONDecodeError) as e:
             raise ValueError("Invalid base64-encoded credentials") from e
-    
+
     @staticmethod
     def remove_temp_file():
         """Remove temp file generated"""
