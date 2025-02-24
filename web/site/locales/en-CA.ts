@@ -63,6 +63,10 @@ export default {
     'fee-info': {
       title: 'Fee Error',
       description: 'Error retrieving fees, please try again or come back later.'
+    },
+    'pad-confirmation': {
+      title: 'PAD Confirmation',
+      description: 'PAD Account: {accountNumber} is in confirmation period. Please use Credit Card.'
     }
   },
   btn: {
