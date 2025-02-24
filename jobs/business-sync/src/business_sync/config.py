@@ -19,6 +19,7 @@ import tempfile
 import atexit
 import base64
 import json
+import logging
 
 from dotenv import find_dotenv, load_dotenv
 
@@ -82,6 +83,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     # Get the base64-encoded credentials from the environment variable
     WAREHOUSE_CREDENTIALS_FILE_CONTENTS = os.getenv("WAREHOUSE_CREDENTIALS_FILE", None)
 
+
     if WAREHOUSE_CREDENTIALS_FILE_CONTENTS:
         # Optionally strip leading/trailing quotes if necessary
         if (WAREHOUSE_CREDENTIALS_FILE_CONTENTS.startswith("'") and WAREHOUSE_CREDENTIALS_FILE_CONTENTS.endswith("'")) or \
@@ -100,16 +102,16 @@ class _Config:  # pylint: disable=too-few-public-methods
 
         except (base64.binascii.Error, UnicodeDecodeError, json.JSONDecodeError) as e:
             raise ValueError("Invalid base64-encoded credentials") from e
-
-        # Register cleanup function to delete the temp file at exit
-        @staticmethod
-        def remove_temp_file():
-            """Remove temp file generated"""
-            try:
-                if _Config.WAREHOUSE_CREDENTIALS_FILE_PATH:
-                    os.remove(_Config.WAREHOUSE_CREDENTIALS_FILE_PATH)
-            except OSError:
-                pass
+    
+    @staticmethod
+    def remove_temp_file():
+        """Remove temp file generated"""
+        try:
+            if _Config.WAREHOUSE_CREDENTIALS_FILE_PATH \
+                    and os.path.exists(_Config.WAREHOUSE_CREDENTIALS_FILE_PATH):
+                os.remove(_Config.WAREHOUSE_CREDENTIALS_FILE_PATH)
+        except OSError as err:
+            logging.error("Error removing temp file %s: %s", _Config.WAREHOUSE_CREDENTIALS_FILE_PATH, err)
 
     # Update the config to use the temporary file path
     WAREHOUSE_CREDENTIALS_FILE = WAREHOUSE_CREDENTIALS_FILE_PATH
