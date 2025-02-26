@@ -143,7 +143,8 @@ def run():
                                 OR (
                                     co.last_ar_filed_dt IS NOT NULL
                                     AND EXTRACT(YEAR FROM co.last_ar_filed_dt) < EXTRACT(YEAR FROM current_date)
-                                );
+                                )
+                            );
                         """
                     )
                 )
