@@ -2,6 +2,7 @@
 // handle document download buttons for final page, this will only work for the 2 current file from the backend
 // any updates to the backend this will need to be reworked
 const arStore = useAnnualReportStore()
+const { t } = useI18n()
 </script>
 <template>
   <ClientOnly>
@@ -9,17 +10,21 @@ const arStore = useAnnualReportStore()
       v-if="arStore.arFiling.filing?.documents && arStore.arFiling.filing.documents.length > 0"
       class="flex w-full"
     >
-      <UButton
+      <UTooltip
         v-for="doc in arStore.arFiling.filing.documents"
         :key="doc.name"
-        size="lg"
-        color="blue"
-        variant="outline"
-        icon="i-mdi-tray-arrow-down"
-        :loading="arStore.loading"
-        :label="doc.name === 'Receipt' ? $t('btn.downloadReceipt') : $t('btn.downloadReport')"
-        @click="arStore.handleDocumentDownload(doc)"
-      />
+        :text="t('page.submitted.docEmailNotice')"
+      >
+        <UButton
+          size="lg"
+          color="blue"
+          variant="outline"
+          icon="i-mdi-tray-arrow-down"
+          :loading="arStore.loading"
+          :label="doc.name === 'Receipt' ? $t('btn.downloadReceipt') : $t('btn.downloadReport')"
+          @click="arStore.handleDocumentDownload(doc)"
+        />
+      </UTooltip>
     </div>
   </ClientOnly>
 </template>
