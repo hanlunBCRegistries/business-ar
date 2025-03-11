@@ -287,8 +287,9 @@ export default {
       noDirectors: 'Aucun réalisateur trouvé'
     },
     submitted: {
-      title: 'Rapport Annuel Terminé - Rapport Annuel de Service CB',
-      h1: 'Rapport Annuel {year} Complété'
+      title: 'Rapport annuel complété - Rapport annuel de Service BC',
+      h1: 'Rapport annuel {year} complété',
+      docEmailNotice: 'Une copie de ce document sera également envoyée par courriel une fois le traitement du paiement terminé.'
     },
     tos: { // TODO: review tos page translations
       title: "Conditions d'Utilisation - Rapport Annuel de Service CB",
