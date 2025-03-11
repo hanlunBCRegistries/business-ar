@@ -67,6 +67,10 @@ export default {
     'pad-confirmation': {
       title: 'PAD Confirmation',
       description: 'PAD Account: {accountNumber} is in confirmation period. Please use Credit Card.'
+    },
+    'business-dashboard-dev': {
+      title: '',
+      description: 'Business dashboard management is under development - you cannot add businesses to My Business Registry and manage your business information at this time, but you can file your annual report.'
     }
   },
   btn: {

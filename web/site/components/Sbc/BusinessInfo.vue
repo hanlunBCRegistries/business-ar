@@ -41,7 +41,12 @@ const isMoreReports = () => {
             {{ item.label }}
           </td>
           <td class="text-bcGovColor-midGray">
-            {{ item.value }}
+            <UTooltip v-if="item.label === $t('labels.busName')" :text="$t('alerts.business-dashboard-dev.description')">
+              <span>{{ item.value }}</span>
+            </UTooltip>
+            <template v-else>
+              {{ item.value }}
+            </template>
           </td>
         </tr>
       </tbody>
