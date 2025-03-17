@@ -30,7 +30,7 @@ describe('<BusinessEmail />', () => {
     })
   })
 
-  const renderComponent = async () => 
+  const renderComponent = () =>
     renderSuspended(BusinessEmail, {
       global: { plugins: [pinia] }
     })
@@ -66,4 +66,3 @@ describe('<BusinessEmail />', () => {
     expect(getByText('No email found')).toBeTruthy()
   })
 })
-

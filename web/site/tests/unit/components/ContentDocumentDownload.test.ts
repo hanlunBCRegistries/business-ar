@@ -29,7 +29,7 @@ describe('<DocumentDownload />', () => {
     })
   })
 
-  const renderComponent = async () => 
+  const renderComponent = () =>
     renderSuspended(DocumentDownload, {
       global: { plugins: [pinia] }
     })

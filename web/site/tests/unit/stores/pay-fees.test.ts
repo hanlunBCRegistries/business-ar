@@ -1,3 +1,9 @@
+import { describe, expect, it, beforeEach, vi } from 'vitest'
+import { registerEndpoint } from '@nuxt/test-utils/runtime'
+import { setActivePinia, createPinia } from 'pinia'
+import { usePayFeesStore, AlertCategory } from '#imports'
+import { mockFeeInfo, mockFilingData } from '~/tests/mocks/mockedData'
+
 // All vi.mock calls need to be at the top, before any imports
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: (key: string) => key })
@@ -11,7 +17,7 @@ vi.mock('~/stores/account', () => ({
 }))
 
 // Create a mock function for addAlert that we can spy on later
-const mockAddAlert = vi.fn();
+const mockAddAlert = vi.fn()
 
 vi.mock('~/stores/alert', () => ({
   useAlertStore: () => ({
@@ -24,28 +30,17 @@ vi.mock('~/stores/alert', () => ({
 vi.mock('~/composables/useBarApi', () => ({
   useBarApi: vi.fn().mockImplementation((url) => {
     if (url.includes('/fees/')) {
-      throw new Error('some-error');
+      throw new Error('some-error')
     }
-    return {};
+    return {}
   })
 }))
-
-// Now import everything else
-import { describe, expect, it, beforeEach, vi } from 'vitest'
-import { registerEndpoint } from '@nuxt/test-utils/runtime'
-import { setActivePinia, createPinia } from 'pinia'
-import { usePayFeesStore, useAccountStore, useAlertStore, AlertCategory } from '#imports'
-import {
-  mockFeeInfo,
-  mockFilingData,
-  mockedOrgs
-} from '~/tests/mocks/mockedData'
 
 describe('Pay Fees Store Tests', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     // Reset the mock before each test
-    mockAddAlert.mockClear();
+    mockAddAlert.mockClear()
   })
 
   it('inits the store with empty values', () => {
@@ -126,7 +121,7 @@ describe('Pay Fees Store Tests', () => {
 
   it('will add an alert if theres an error in addPayFees', async () => {
     const feeStore = usePayFeesStore()
-    
+
     try {
       await feeStore.addPayFees('BCANN')
     } catch (error) {

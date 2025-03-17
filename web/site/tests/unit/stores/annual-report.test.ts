@@ -1,7 +1,12 @@
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
+import { setActivePinia } from 'pinia'
+import { createTestingPinia } from '@pinia/testing'
+import { useAnnualReportStore, useAlertStore } from '#imports'
+
 // All vi.mock calls need to be at the top, before any imports
 vi.mock('~/stores/tos', () => ({
   useTosStore: () => ({
-    getTermsOfUse: vi.fn().mockResolvedValue({ 
+    getTermsOfUse: vi.fn().mockResolvedValue({
       isTermsOfUseAccepted: true,
       termsOfUseCurrentVersion: '1'
     })
@@ -43,14 +48,6 @@ vi.mock('~/composables/useBarApi', () => ({
   })
 }))
 
-// Now import everything else
-import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
-import { registerEndpoint } from '@nuxt/test-utils/runtime'
-import { setActivePinia, createPinia } from 'pinia'
-import { createTestingPinia } from '@pinia/testing'
-import { useAnnualReportStore, useBusinessStore, useAccountStore, useAlertStore } from '#imports'
-import { mockNewAccount, mockedArFilingResponse } from '~/tests/mocks/mockedData'
-
 describe('Annual Report Store Tests', () => {
   let pinia: ReturnType<typeof createTestingPinia>
 
@@ -86,14 +83,14 @@ describe('Annual Report Store Tests', () => {
 
   it('creates ar filing, assigns store value and returns paymentToken and filingId', async () => {
     const arStore = useAnnualReportStore()
-    
+
     // Submit filing
     const result = await arStore.submitAnnualReportFiling({
       agmDate: '2022-10-10',
       votedForNoAGM: false,
       unanimousResolutionDate: null
     })
-    
+
     // assert
     expect(arStore.arFiling).toBeDefined()
     expect(result.paymentToken).toBe(123456)
@@ -129,7 +126,7 @@ describe('Annual Report Store Tests', () => {
       votedForNoAGM: false,
       unanimousResolutionDate: null
     })
-    
+
     // Check result1 exists
     expect(result1).toBeDefined()
 
@@ -139,10 +136,10 @@ describe('Annual Report Store Tests', () => {
       votedForNoAGM: false,
       unanimousResolutionDate: null
     })
-    
+
     // Check result2 exists before destructuring
     expect(result2).toBeDefined()
-    
+
     // assert
     expect(result2.paymentToken).toBe(123456)
     expect(result2.filingId).toBe(1)
@@ -185,7 +182,7 @@ describe('Annual Report Store Tests', () => {
       removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation(node => node)
       clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
       vi.useFakeTimers()
-      
+
       // Mock Nuxt app with keycloak
       vi.mock('#app', () => ({
         useNuxtApp: () => ({
@@ -204,10 +201,10 @@ describe('Annual Report Store Tests', () => {
 
     it('should download the file and call window/document events/methods', async () => {
       const arStore = useAnnualReportStore()
-      
+
       // Use global fetch instead of stubGlobal
       global.$fetch = vi.fn().mockResolvedValue(new Blob(['test content'], { type: 'application/pdf' }))
-      
+
       const file = { name: 'Report', url: '/path/to/file' }
       const alertStore = useAlertStore(pinia)
       vi.spyOn(alertStore, 'addAlert')
@@ -230,15 +227,15 @@ describe('Annual Report Store Tests', () => {
       const arStore = useAnnualReportStore()
       const alertStore = useAlertStore(pinia)
       vi.spyOn(alertStore, 'addAlert')
-      
+
       // Use global fetch instead of stubGlobal
       global.$fetch = vi.fn().mockRejectedValue(new Error('Failed'))
-      
-      await arStore.handleDocumentDownload({ 
-        name: 'Report', 
-        url: '/path/to/file' 
+
+      await arStore.handleDocumentDownload({
+        name: 'Report',
+        url: '/path/to/file'
       })
-      
+
       expect(alertStore.addAlert).toHaveBeenCalledWith({
         severity: 'error',
         category: 'document-download'

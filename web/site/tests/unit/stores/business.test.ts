@@ -1,3 +1,17 @@
+import { vi, describe, expect, it, beforeEach } from 'vitest'
+import { registerEndpoint } from '@nuxt/test-utils/runtime'
+import { setActivePinia, createPinia } from 'pinia'
+import { useBusinessStore, useAnnualReportStore, useAlertStore } from '#imports'
+import { dateToString } from '~/utils/date'
+import {
+  mockedBusinessNano,
+  mockedBusinessFull,
+  mockedArFilingResponse,
+  mockedFilingTask,
+  mockedTodoTask,
+  mockedOrgs
+} from '~/tests/mocks/mockedData'
+
 // All vi.mock calls need to be at the top, before any imports
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: (key: string) => key })
@@ -5,7 +19,7 @@ vi.mock('vue-i18n', () => ({
 
 vi.mock('~/stores/tos', () => ({
   useTosStore: () => ({
-    getTermsOfUse: vi.fn().mockResolvedValue({ 
+    getTermsOfUse: vi.fn().mockResolvedValue({
       isTermsOfUseAccepted: true,
       termsOfUseCurrentVersion: '1'
     })
@@ -21,8 +35,8 @@ vi.mock('~/stores/pay-fees', () => ({
 // Mock account store to prevent userAccounts.some is not a function
 vi.mock('~/stores/account', () => {
   // Create a mock implementation that can be customized in tests
-  const mockUserAccounts = [{ id: 123, name: 'Test Account' }];
-  
+  const mockUserAccounts = [{ id: 123, name: 'Test Account' }]
+
   return {
     useAccountStore: () => ({
       currentAccount: { id: 123, token: '123' },
@@ -30,72 +44,57 @@ vi.mock('~/stores/account', () => {
       getAndSetAccount: vi.fn().mockImplementation((accountId) => {
         // Make sure the account ID exists in userAccounts
         if (!mockUserAccounts.some(acc => acc.id === parseInt(accountId))) {
-          mockUserAccounts.push({ id: parseInt(accountId), name: 'Added Account' });
+          mockUserAccounts.push({ id: parseInt(accountId), name: 'Added Account' })
         }
-        return Promise.resolve(true);
+        return Promise.resolve(true)
       }),
       selectUserAccount: vi.fn().mockResolvedValue(true)
     })
-  };
+  }
 })
 
 // Fix the useBarApi mock to return proper data based on the URL
 vi.mock('~/composables/useBarApi', () => ({
-  useBarApi: vi.fn().mockImplementation((url, options) => {
+  useBarApi: vi.fn().mockImplementation((url, _options) => {
     if (url.includes('/business/token/1')) {
-      return mockedBusinessNano;
+      return mockedBusinessNano
     }
     if (url.includes('/filings/12/payment')) {
-      return mockedArFilingResponse;
+      return mockedArFilingResponse
     }
     if (url.includes('/tasks')) {
       if (fakeApiCallTasks.mock) {
-        return fakeApiCallTasks();
+        return fakeApiCallTasks()
       }
-      return mockedFilingTask;
+      return mockedFilingTask
     }
     if (url.includes(`/business/${mockedBusinessNano.identifier}`)) {
-      return { business: { ...mockedBusinessFull.business, corpState: 'ACT' } };
+      return { business: { ...mockedBusinessFull.business, corpState: 'ACT' } }
     }
     if (url.includes('/business/undefined')) {
       if (fakeApiCallBusinessDetails.mock) {
-        const result = fakeApiCallBusinessDetails();
+        const result = fakeApiCallBusinessDetails()
         // Ensure corpState is ACT to avoid the inactive state error
         if (result && result.business) {
-          result.business.corpState = 'ACT';
+          result.business.corpState = 'ACT'
         }
-        return result;
+        return result
       }
-      return { business: { ...mockedBusinessFull.business, corpState: 'ACT' } };
+      return { business: { ...mockedBusinessFull.business, corpState: 'ACT' } }
     }
-    return { business: { ...mockedBusinessFull.business, corpState: 'ACT' } };
+    return { business: { ...mockedBusinessFull.business, corpState: 'ACT' } }
   })
 }))
 
-// Now import everything else
-import { vi, describe, expect, it, beforeEach } from 'vitest'
-import { registerEndpoint } from '@nuxt/test-utils/runtime'
-import { setActivePinia, createPinia } from 'pinia'
-import { useBusinessStore, useAnnualReportStore, useAccountStore, useAlertStore } from '#imports'
-import { dateToString } from '~/utils/date'
-import {
-  mockedBusinessNano,
-  mockedBusinessFull,
-  mockedArFilingResponse,
-  mockedFilingTask,
-  mockedTodoTask,
-  mockedOrgs
-} from '~/tests/mocks/mockedData'
-
 // Define fake API calls before using them in the mock
-const fakeApiCallBusinessDetails = vi.fn().mockImplementation(() => ({ 
-  business: { 
-    ...mockedBusinessFull.business, 
-    corpState: 'ACT' 
-  } 
-}));
+const fakeApiCallBusinessDetails = vi.fn().mockImplementation(() => ({
+  business: {
+    ...mockedBusinessFull.business,
+    corpState: 'ACT'
+  }
+}))
 
-const fakeApiCallTasks = vi.fn();
+const fakeApiCallTasks = vi.fn()
 
 // Keep the registerEndpoint calls for reference, but they won't be used
 registerEndpoint('/business/token/1', {
@@ -136,14 +135,14 @@ describe('Business Store Tests', () => {
     setActivePinia(createPinia())
     const alertStore = useAlertStore()
     addAlertSpy = vi.spyOn(alertStore, 'addAlert')
-    
+
     // Reset the mock implementations before each test
     fakeApiCallTasks.mockImplementation(() => mockedFilingTask)
-    fakeApiCallBusinessDetails.mockImplementation(() => ({ 
-      business: { 
-        ...mockedBusinessFull.business, 
-        corpState: 'ACT' 
-      } 
+    fakeApiCallBusinessDetails.mockImplementation(() => ({
+      business: {
+        ...mockedBusinessFull.business,
+        corpState: 'ACT'
+      }
     }))
   })
 
@@ -168,7 +167,7 @@ describe('Business Store Tests', () => {
         throw e
       }
     }
-    
+
     // Compare only the relevant properties instead of the entire object
     expect(busStore.businessNano.identifier).toEqual(mockedBusinessNano.identifier)
     expect(busStore.businessNano.legalType).toEqual(mockedBusinessNano.legalType)
@@ -259,10 +258,10 @@ describe('Business Store Tests', () => {
       fakeApiCallBusinessDetails.mockImplementation(() => mockedBusinessFull)
       const busStore = useBusinessStore()
       const arStore = useAnnualReportStore()
-      
+
       // Set up businessNano to avoid undefined error
       busStore.businessNano = mockedBusinessNano
-      
+
       const { task, taskValue } = await busStore.getBusinessTask()
 
       expect(task).toEqual('filing')
@@ -277,10 +276,10 @@ describe('Business Store Tests', () => {
       fakeApiCallBusinessDetails.mockImplementation(() => mockedBusinessFull)
       const busStore = useBusinessStore()
       const arStore = useAnnualReportStore()
-      
+
       // Set up businessNano to avoid undefined error
       busStore.businessNano = mockedBusinessNano
-      
+
       const { task, taskValue } = await busStore.getBusinessTask()
 
       expect(task).toEqual('todo')
