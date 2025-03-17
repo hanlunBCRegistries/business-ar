@@ -1,39 +1,68 @@
 // YourComponent.spec.ts
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderSuspended } from '@nuxt/test-utils/runtime'
-import { useBusinessStore, useAccountStore } from '#imports'
-import { mockNewAccount, mockedBusinessFull } from '~/tests/mocks/mockedData'
+import { createTestingPinia } from '@pinia/testing'
 import BusinessEmail from '~/components/content/BusinessEmail.vue'
+import { useBusinessStore, useAccountStore } from '#imports'
+import { mockNewAccount } from '~/tests/mocks/mockedData'
+
+// Simplified mocks
+vi.mock('~/stores/tos', () => ({
+  useTosStore: () => ({
+    getTermsOfUse: vi.fn().mockResolvedValue({ isTermsOfUseAccepted: true })
+  })
+}))
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({ t: (key: string) => key })
+}))
 
 describe('<BusinessEmail />', () => {
+  let pinia: ReturnType<typeof createTestingPinia>
+
   beforeEach(() => {
-    resetPiniaStores()
-  })
-  it('mounts', async () => {
-    const component = await renderSuspended(BusinessEmail)
-
-    expect(component).toBeTruthy()
-  })
-
-  it('displays the email from the current account if it exists in the store', async () => {
-    useAccountStore().currentAccount = {
-      ...mockNewAccount,
-      // @ts-ignore
-      contacts: [{ email: 'account@email.com' }]
-    }
-    useBusinessStore().currentBusiness = mockedBusinessFull.business
-    const component = await renderSuspended(BusinessEmail)
-    expect(component.getByText('account@email.com')).toBeTruthy()
+    pinia = createTestingPinia({
+      stubActions: false,
+      initialState: {
+        account: { currentAccount: null },
+        business: { currentBusiness: null }
+      }
+    })
   })
 
-  it('displays the email from business invitation email if no account email found', async () => {
-    useBusinessStore().currentBusiness = mockedBusinessFull.business
-    const component = await renderSuspended(BusinessEmail)
-    expect(component.getByText('test@example.com')).toBeTruthy()
+  const renderComponent = () =>
+    renderSuspended(BusinessEmail, {
+      global: { plugins: [pinia] }
+    })
+
+  it('displays account email when available', async () => {
+    const accountStore = useAccountStore(pinia)
+    const businessStore = useBusinessStore(pinia)
+
+    accountStore.$patch({
+      currentAccount: {
+        ...mockNewAccount,
+        contacts: [{ email: 'account@test.com' }]
+      }
+    })
+    businessStore.$patch({ currentBusiness: {} })
+
+    const { getByText } = await renderComponent()
+    expect(getByText('account@test.com')).toBeTruthy()
   })
 
-  it('displays "No email found" if no email is available', async () => {
-    const component = await renderSuspended(BusinessEmail)
-    expect(component.getByText('No email found')).toBeTruthy()
+  it('displays business invitation email when no account email', async () => {
+    const businessStore = useBusinessStore(pinia)
+    businessStore.$patch({
+      currentBusiness: { invitationEmail: 'business@test.com' }
+    })
+
+    const { getByText } = await renderComponent()
+    expect(getByText('business@test.com')).toBeTruthy()
+  })
+
+  it('shows fallback when no emails found', async () => {
+    const { getByText } = await renderComponent()
+    expect(getByText('No email found')).toBeTruthy()
   })
 })

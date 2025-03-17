@@ -67,6 +67,10 @@ export default {
     'pad-confirmation': {
       title: 'Débit Préautorisé (PAD) en Période de Confirmation',
       description: 'Votre compte PAD: {accountNumber} est en période de confirmation. Veuillez utiliser une carte de crédit.'
+    },
+    'business-dashboard-dev': {
+      title: '',
+      description: 'La gestion du tableau de bord des entreprises est en cours de développement - vous ne pouvez pas ajouter d\'entreprises à Mon registre des entreprises et gérer vos informations d\'entreprise pour le moment, mais vous pouvez déposer votre rapport annuel.'
     }
   },
   btn: {

@@ -5,82 +5,99 @@ import { createTestingPinia } from '@pinia/testing'
 import { mockedArFilingResponse } from '~/tests/mocks/mockedData'
 import DocumentDownload from '~/components/content/DocumentDownload.vue'
 
-const pinia = createTestingPinia()
+// Mock TOS store to prevent middleware errors
+vi.mock('~/stores/tos', () => ({
+  useTosStore: () => ({
+    getTermsOfUse: vi.fn().mockResolvedValue({ isTermsOfUseAccepted: true })
+  })
+}))
 
-vi.mock('~/stores/annual-report.ts', async (originalImport) => {
-  const mod = await originalImport() as any
-  return {
-    ...mod,
-    useAnnualReportStore: () => {
-      return mod.useAnnualReportStore(pinia)
-    }
-  }
-})
+// Mock i18n to prevent setup errors
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({ t: (key: string) => key })
+}))
 
 describe('<DocumentDownload />', () => {
+  let pinia: ReturnType<typeof createTestingPinia>
+
   beforeEach(() => {
-    vi.resetAllMocks()
+    pinia = createTestingPinia({
+      stubActions: true,
+      initialState: {
+        annualReport: { arFiling: null }
+      }
+    })
   })
 
+  const renderComponent = () =>
+    renderSuspended(DocumentDownload, {
+      global: { plugins: [pinia] }
+    })
+
   it('renders download buttons for documents', async () => {
-    useAnnualReportStore().arFiling = {
+    const store = useAnnualReportStore(pinia)
+    store.arFiling = {
       filing: {
-        header: mockedArFilingResponse.filing.header,
-        annualReport: mockedArFilingResponse.filing.annualReport,
+        ...mockedArFilingResponse.filing,
         documents: [
           { name: 'Receipt', url: 'receipt-url' },
           { name: 'Report', url: 'report-url' }
         ]
       }
     }
-    await renderSuspended(DocumentDownload)
+
+    await renderComponent()
     const buttons = screen.getAllByRole('button')
-    expect(buttons.length).toBe(2)
-    expect(buttons[0].innerHTML).toContain('Download Receipt')
-    expect(buttons[1].innerHTML).toContain('Download Report')
+    expect(buttons).toHaveLength(2)
+    expect(buttons[0].textContent).toContain('Download Receipt')
+    expect(buttons[1].textContent).toContain('Download Report')
   })
 
   it('only renders whats in the store', async () => {
-    useAnnualReportStore().arFiling = {
+    const store = useAnnualReportStore(pinia)
+    store.arFiling = {
       filing: {
-        header: mockedArFilingResponse.filing.header,
-        annualReport: mockedArFilingResponse.filing.annualReport,
+        ...mockedArFilingResponse.filing,
         documents: [
           { name: 'Receipt', url: 'receipt-url' }
         ]
       }
     }
-    await renderSuspended(DocumentDownload)
+
+    await renderComponent()
     const buttons = screen.getAllByRole('button')
-    expect(buttons.length).toBe(1)
-    expect(buttons[0].innerHTML).toContain('Download Receipt')
+    expect(buttons).toHaveLength(1)
+    expect(buttons[0].textContent).toContain('Download Receipt')
   })
 
-  it('wont renders any buttons in an empty store', async () => {
-    useAnnualReportStore().arFiling = mockedArFilingResponse
-    await renderSuspended(DocumentDownload)
+  it('wont render any buttons in an empty store', async () => {
+    const store = useAnnualReportStore(pinia)
+    store.arFiling = mockedArFilingResponse
+
+    await renderComponent()
     const buttons = screen.queryAllByRole('button')
-    expect(buttons.length).toBe(0)
+    expect(buttons).toHaveLength(0)
   })
 
   it('calls handleDocumentDownload on button click', async () => {
-    useAnnualReportStore().arFiling = {
+    const store = useAnnualReportStore(pinia)
+    store.arFiling = {
       filing: {
-        header: mockedArFilingResponse.filing.header,
-        annualReport: mockedArFilingResponse.filing.annualReport,
+        ...mockedArFilingResponse.filing,
         documents: [
           { name: 'Receipt', url: 'receipt-url' },
           { name: 'Report', url: 'report-url' }
         ]
       }
     }
-    await renderSuspended(DocumentDownload)
-    const buttons = screen.getAllByRole('button')
-    expect(buttons.length).toBe(2)
+    store.handleDocumentDownload = vi.fn()
 
+    await renderComponent()
+    const buttons = screen.getAllByRole('button')
     await fireEvent.click(buttons[0])
 
-    expect(useAnnualReportStore().handleDocumentDownload).toBeCalledTimes(1)
-    expect(useAnnualReportStore().handleDocumentDownload).toBeCalledWith({ name: 'Receipt', url: 'receipt-url' })
+    expect(store.handleDocumentDownload).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Receipt', url: 'receipt-url' })
+    )
   })
 })

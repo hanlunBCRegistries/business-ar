@@ -3,7 +3,26 @@ import { renderSuspended } from '@nuxt/test-utils/runtime'
 import { screen } from '@testing-library/vue'
 import { createTestingPinia } from '@pinia/testing'
 import { SbcAlert } from '#components'
+import { AlertCategory } from '#imports'
 import en from '~/locales/en-CA'
+
+// All vi.mock calls need to be at the top, before any imports
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({ t: (key: string) => key })
+}))
+
+vi.mock('~/composables/useBarApi', () => ({
+  useBarApi: vi.fn().mockResolvedValue({})
+}))
+
+vi.mock('~/stores/tos', () => ({
+  useTosStore: () => ({
+    getTermsOfUse: vi.fn().mockResolvedValue({
+      isTermsOfUseAccepted: true,
+      termsOfUseCurrentVersion: '1'
+    })
+  })
+}))
 
 const pinia = createTestingPinia()
 
@@ -23,7 +42,11 @@ describe('<SbcAlert />', () => {
   })
 
   it('mounts', async () => {
-    const component = await renderSuspended(SbcAlert)
+    const component = await renderSuspended(SbcAlert, {
+      props: {
+        showOnCategory: [AlertCategory.CREATE_ACCOUNT]
+      }
+    })
     expect(component).toBeTruthy()
   })
 
