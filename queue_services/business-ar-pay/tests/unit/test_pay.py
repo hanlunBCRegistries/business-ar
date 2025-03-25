@@ -67,95 +67,102 @@ class TestPayFiler:
             "id": "12345",
             "time": "2023-01-01T12:00:00Z",
             "datacontenttype": "application/json",
-            "data": {
-                "id": 1000,
-                "status_code": "COMPLETED"
-            }
+            "data": {"id": 1000, "status_code": "COMPLETED"},
         }
 
     @pytest.fixture
     def mock_request(self, mock_cloud_event):
         """Create a mock Flask request with cloud event data."""
-        return MagicMock(data=json.dumps(mock_cloud_event).encode('utf-8'))
-    
-    @patch('business_ar_pay.resources.pay_filer.gcp_queue.get_simple_cloud_event')
+        return MagicMock(data=json.dumps(mock_cloud_event).encode("utf-8"))
+
+    @patch("business_ar_pay.resources.pay_filer.gcp_queue.get_simple_cloud_event")
     def test_worker_empty_request(self, mock_cloud_event, mock_app):
         """Test handling of empty request data."""
         # Mock empty request
-        with patch('flask.request', MagicMock(data=None)):
+        with patch("flask.request", MagicMock(data=None)):
             response = worker()
-        
+
         # Verify response
         assert response == ({}, HTTPStatus.OK)
         # Cloud event extraction should not be called
         mock_cloud_event.assert_not_called()
 
-    @patch('business_ar_pay.resources.pay_filer.get_payment_token')
-    @patch('business_ar_pay.resources.pay_filer.gcp_queue.get_simple_cloud_event')
-    def test_worker_no_payment_token(self, mock_cloud_event, mock_payment, mock_app, mock_request):
+    @patch("business_ar_pay.resources.pay_filer.get_payment_token")
+    @patch("business_ar_pay.resources.pay_filer.gcp_queue.get_simple_cloud_event")
+    def test_worker_no_payment_token(
+        self, mock_cloud_event, mock_payment, mock_app, mock_request
+    ):
         """Test handling of event with no payment token."""
         # Mock cloud event extraction
         mock_cloud_event.return_value = {"data": {"id": 1000}}
-        
+
         # Mock payment token not found
         mock_payment.return_value = None
-        
+
         # Execute the worker with mocked request
-        with patch('flask.request', mock_request):
+        with patch("flask.request", mock_request):
             response = worker()
-        
+
         # Verify response - should still return OK to remove from queue
         assert response == ({}, HTTPStatus.OK)
 
-    @patch('business_ar_pay.resources.pay_filer.get_payment_token')
-    @patch('business_ar_pay.resources.pay_filer.gcp_queue.get_simple_cloud_event')
-    @patch('business_ar_pay.resources.pay_filer.Filing')
-    def test_worker_filing_not_found(self, mock_filing, mock_cloud_event, mock_payment, mock_app, mock_request):
+    @patch("business_ar_pay.resources.pay_filer.get_payment_token")
+    @patch("business_ar_pay.resources.pay_filer.gcp_queue.get_simple_cloud_event")
+    @patch("business_ar_pay.resources.pay_filer.Filing")
+    def test_worker_filing_not_found(
+        self, mock_filing, mock_cloud_event, mock_payment, mock_app, mock_request
+    ):
         """Test handling of payment with no associated filing."""
         # Mock the payment token
         payment_token = MagicMock()
         payment_token.id = 1000
         payment_token.status_code = "COMPLETED"
         mock_payment.return_value = payment_token
-        
+
         # Mock cloud event extraction
-        mock_cloud_event.return_value = {"data": {"id": 1000, "status_code": "COMPLETED"}}
-        
+        mock_cloud_event.return_value = {
+            "data": {"id": 1000, "status_code": "COMPLETED"}
+        }
+
         # Mock filing not found
         mock_filing.get_filing_by_payment_token.return_value = None
-        
+
         # Execute the worker with mocked request
-        with patch('flask.request', mock_request):
+        with patch("flask.request", mock_request):
             response = worker()
-        
+
         # Update to match actual behavior - the worker returns OK even when filing is not found
         assert response == ({}, HTTPStatus.OK)
 
-    @patch('business_ar_pay.resources.pay_filer.get_payment_token')
-    @patch('business_ar_pay.resources.pay_filer.gcp_queue.get_simple_cloud_event')
-    @patch('business_ar_pay.resources.pay_filer.Filing')
-    def test_worker_already_completed(self, mock_filing, mock_cloud_event, mock_payment, mock_app, mock_request):
+    @patch("business_ar_pay.resources.pay_filer.get_payment_token")
+    @patch("business_ar_pay.resources.pay_filer.gcp_queue.get_simple_cloud_event")
+    @patch("business_ar_pay.resources.pay_filer.Filing")
+    def test_worker_already_completed(
+        self, mock_filing, mock_cloud_event, mock_payment, mock_app, mock_request
+    ):
         """Test handling of already processed payment."""
         # Mock the payment token
         payment_token = MagicMock()
         payment_token.id = 1000
         payment_token.status_code = "COMPLETED"
         mock_payment.return_value = payment_token
-        
+
         # Mock cloud event extraction
-        mock_cloud_event.return_value = {"data": {"id": 1000, "status_code": "COMPLETED"}}
-        
+        mock_cloud_event.return_value = {
+            "data": {"id": 1000, "status_code": "COMPLETED"}
+        }
+
         # Mock filing already completed
         filing = MagicMock()
         filing.status = Filing.Status.COMPLETED.value
         mock_filing.get_filing_by_payment_token.return_value = filing
-        
+
         # Execute the worker with mocked request
-        with patch('flask.request', mock_request):
+        with patch("flask.request", mock_request):
             response = worker()
-        
+
         # Verify response
         assert response == ({}, HTTPStatus.OK)
-        
+
         # Verify filing was not modified
         filing.save.assert_not_called()
