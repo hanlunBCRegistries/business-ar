@@ -173,7 +173,8 @@ def send_email(app: Flask, filing_id: str, token: str):
             timeout=TIMEOUT,
         )
         if not req or req.status_code != 200:
-            app.logger.error(f"Failed to send email for filing {filing_id} with status code {req.status_code}. Response: {req.text}")
+            app.logger.error(f"Failed to send email for filing {filing_id} with status code {req.status_code}."
+                             f" Response: {req.text}")
     except Exception as exception:
         app.logger.error(f"Failed to send email for filing {filing_id}: {exception}")
 
