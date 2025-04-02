@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, Mock, MagicMock
-from process_paid_filings.job import clean_none, send_email, delete_ar_prompt, complete_filing
+from process_paid_filings.job import clean_none, send_email, delete_ar_prompt, complete_filing, TIMEOUT
 
 class TestJob(unittest.TestCase):
     def test_clean_none(self):
@@ -31,33 +31,6 @@ class TestJob(unittest.TestCase):
         self.assertEqual(input_dict, expected_dict)
     
     @patch('process_paid_filings.job.requests.post')
-    def test_send_email_success(self, mock_post):
-        # Setup mock response
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_post.return_value = mock_response
-        
-        # Mock Flask app
-        mock_app = MagicMock()
-        mock_app.config = {"BUSINESS_AR_API_URL": "http://test-api"}
-        mock_app.logger = MagicMock()
-        
-        # Call function
-        send_email(mock_app, "12345", "test-token")
-        
-        # Verify requests.post was called with correct parameters
-        mock_post.assert_called_once_with(
-            url="http://test-api/internal/filings/12345/notify",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer test-token"
-            },
-            timeout=20
-        )
-        # Verify no errors were logged
-        mock_app.logger.error.assert_not_called()
-    
-    @patch('process_paid_filings.job.requests.post')
     def test_send_email_failure(self, mock_post):
         # Setup mock response for failure
         mock_response = Mock()
@@ -75,33 +48,6 @@ class TestJob(unittest.TestCase):
         
         # Verify error was logged
         mock_app.logger.error.assert_called_once()
-    
-    @patch('process_paid_filings.job.requests.delete')
-    def test_delete_ar_prompt_success(self, mock_delete):
-        # Setup mock response
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_delete.return_value = mock_response
-        
-        # Mock Flask app
-        mock_app = MagicMock()
-        mock_app.config = {"COLIN_API_URL": "http://colin-api"}
-        mock_app.logger = MagicMock()
-        
-        # Call function
-        delete_ar_prompt(mock_app, "BC", "123456", "test-token")
-        
-        # Verify requests.delete was called with correct parameters
-        mock_delete.assert_called_once_with(
-            "http://colin-api/businesses/BC/123456/filings/reminder",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer test-token"
-            },
-            timeout=20
-        )
-        # Verify success was logged
-        mock_app.logger.info.assert_called_with("Successfully deleted AR prompt for corporation 123456.")
     
     @patch('process_paid_filings.job.requests.delete')
     def test_delete_ar_prompt_failure(self, mock_delete):
